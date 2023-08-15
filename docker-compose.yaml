@@ -1,5 +1,17 @@
 version: '3.8'
 services:
+  springboot:
+    build:
+      context: order-service
+      dockerfile: Dockerfile
+    depends_on:
+      - db-postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-postgres:5432/postgres
+      KAFKA_HOST: kafka
+    networks:
+      - microservicios-saga-coreografia-network
   db-postgres:
     image: postgres:14.1-alpine
     restart: always
