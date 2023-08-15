@@ -62,6 +62,17 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - microservicios-saga-coreografia-network
+  nginx:
+    depends_on:
+      - springboot
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    restart: unless-stopped
+    networks:
+      - microservicios-saga-coreografia-network
 networks:
   microservicios-saga-coreografia-network:
     driver: bridge

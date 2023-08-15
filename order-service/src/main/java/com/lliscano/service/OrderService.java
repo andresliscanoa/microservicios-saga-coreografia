@@ -3,6 +3,9 @@ package com.lliscano.service;
 import com.lliscano.dto.OrderDTO;
 import com.lliscano.dto.ResponseDTO;
 import com.lliscano.dto.events.KafkaOrderCreatedDTO;
+import com.lliscano.dto.events.KafkaPaymentDTO;
+import com.lliscano.entity.Order;
+import com.lliscano.exception.RecordNotFoundException;
 import com.lliscano.mapper.OrderMapper;
 import com.lliscano.repository.OrderRepository;
 import lombok.AllArgsConstructor;
@@ -35,5 +38,23 @@ public class OrderService {
                 .data(orderDTO)
                 .message("Order created successfully")
                 .build();
+    }
+
+    public void updateOrderStatusCompleted(KafkaPaymentDTO kafkaPaymentDTO) {
+        Order order = this.repository.findByTransactionId(kafkaPaymentDTO.getData().getTransactionId())
+                .orElseThrow(() -> new RecordNotFoundException("Order not found by transaction id "+kafkaPaymentDTO.getData().getTransactionId()));
+        if(kafkaPaymentDTO.getEvent().equalsIgnoreCase("payment-created")){
+            order.setOrderStatus("COMPLETED");
+            this.repository.save(order);
+        }
+    }
+    public void updateOrderStatusCanceled(KafkaPaymentDTO kafkaPaymentDTO) {
+        Order order = this.repository.findByTransactionId(kafkaPaymentDTO.getData().getTransactionId())
+                .orElseThrow(() -> new RecordNotFoundException("Order not found by transaction id "+kafkaPaymentDTO.getData().getTransactionId()));
+        if(kafkaPaymentDTO.getEvent().equalsIgnoreCase("payment-invalid")){
+            order.setOrderStatus("CANCELED");
+            order.setStatement((kafkaPaymentDTO.getData().getStatement()));
+            this.repository.save(order);
+        }
     }
 }
