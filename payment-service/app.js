@@ -4,11 +4,12 @@ const Logger = require( './src/factory/Logger' )
 const logger = new Logger( 'EXPRESS' )
 const port = process.env.PORT || 3000
 const app = require( './src/factory/Express' )
-const {database} = require('./src/factory/Sequelize')
+require('./src/factory/Sequelize')
+const Payment = require('./src/entity/Payment')
+require('./src/factory/KafkaClient')
 try {
-    app.listen(port, () => {
-        logger.info("enviroment", {...process.env})
-        database
+    app.listen(port, async () => {
+        await Payment.sync()
         logger.info( `Server listening on port: ${ port } in mode ${ process.env.NODE_ENV } ` )
         require( './src/factory/Routes' )( app )
     })
