@@ -16,17 +16,11 @@
 - NGINX
 
 
-## Build
-
-```shell
-mvn clean install
-```
-
-## Run
+## Build and Run
 
 ```shell
 docker-compose -f docker-compose.yaml -p microservicios-saga-coreografia up -d --build
 ``` 
 
 ## Arquitectura
-![SAGA COREGRAFIA](./diagrama.png "SAGA COREGRAFIAt")
+![SAGA COREGRAFIA](./diagrama.png "SAGA COREGRAFIA")
