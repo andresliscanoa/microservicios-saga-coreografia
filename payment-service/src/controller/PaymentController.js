@@ -10,6 +10,7 @@ const savePayment = async ({...args}) => {
             transactionId: args.data.transactionId,
             userId: args.data.userId,
             amount: args.data.amount,
+            paymentStatus: args.data.paymentStatus,
             statement: args.data.statement
         })
 }

@@ -27,21 +27,6 @@ const consumerOrderCreatedEvents = new kafka.Consumer(
     {groupId: process.env.KAFKA_ORDER_CREATED_GROUP}
 );
 const producerPaymentCreatedEvent = new kafka.Producer(client);
-producerPaymentCreatedEvent.on('ready', () => {
-    const payload = [
-        {
-            topic: process.env.KAFKA_PAYMENT_CREATED_TOPIC,
-            messages: 'Hello!'
-        }
-    ];
-    producerPaymentCreatedEvent.send(payload, (error, data) => {
-        if (error) {
-            console.error('Error in publishing message:', error);
-        } else {
-            console.log('Message successfully published:', data);
-        }
-    });
-});
 producerPaymentCreatedEvent.on('error', (error) => {
     console.error('Error connecting to Kafka:', error);
 });
@@ -53,9 +38,33 @@ consumerOrderCreatedEvents.on('message', async (message) => {
         if(INITIAL_AMOUNT - data.data.amount > 0) {
             INITIAL_AMOUNT -=data.data.amount
             data.data.statement = "APPROVED"
+            data.data.paymentStatus = "APPROVED"
             await PaymentController.savePayment(data)
+            producerPaymentCreatedEvent.on('ready', () => {
+                const payload = [
+                    {
+                        topic: process.env.KAFKA_PAYMENT_CREATED_TOPIC,
+                        messages: {
+                            event: 'payment-created',
+                            data: {
+                                transactionId: data.data.transactionId,
+                                paymentStatus: data.data.paymentStatus,
+                                statement: data.data.statement
+                            }
+                        }
+                    }
+                ];
+                producerPaymentCreatedEvent.send(payload, (error, data) => {
+                    if (error) {
+                        console.error('Error in publishing message:', error);
+                    } else {
+                        console.log('Message successfully published:', data);
+                    }
+                });
+            });
         } else {
             data.data.statement = "INSUFFICIENT BALANCE"
+            data.data.paymentStatus = "DENY"
             await PaymentController.savePayment(data)
         }
     } catch (error) {
