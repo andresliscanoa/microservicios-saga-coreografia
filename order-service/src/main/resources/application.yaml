@@ -25,6 +25,13 @@ spring:
       properties:
         spring:
           json:
+            value:
+              default:
+                type: com.lliscano.dto.events.KafkaPaymentDTO
+            use:
+              type:
+                info:
+                  headers: false
             trusted:
               packages: com.lliscano.dto
 logging:

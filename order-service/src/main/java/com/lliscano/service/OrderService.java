@@ -45,6 +45,7 @@ public class OrderService {
                 .orElseThrow(() -> new RecordNotFoundException("Order not found by transaction id "+kafkaPaymentDTO.getData().getTransactionId()));
         if(kafkaPaymentDTO.getEvent().equalsIgnoreCase("payment-created")){
             order.setOrderStatus("COMPLETED");
+            order.setStatement(kafkaPaymentDTO.getData().getStatement());
             this.repository.save(order);
         }
     }

@@ -7,9 +7,32 @@ services:
     depends_on:
       - db-postgres
       - kafka
+    restart: on-failure
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-postgres:5432/postgres
       KAFKA_HOST: kafka
+    networks:
+      - microservicios-saga-coreografia-network
+  express:
+    build:
+      context: payment-service
+      dockerfile: Dockerfile
+    depends_on:
+      - db-mysql
+      - kafka
+    restart: on-failure
+    environment:
+      DATABASE_NAME: public
+      DATABASE_USERNAME: root
+      DATABASE_PASSWORD: mauFJcuf5dhRMQrjj
+      DATABASE_HOST: db-mysql
+      DATABASE_DIALECT: mysql
+      KAFKA_HOST: kafka:9092
+      KAFKA_ORDER_CREATED_TOPIC: order-created-topic
+      KAFKA_ORDER_GROUP: order-event-group
+      KAFKA_PAYMENT_CREATED_TOPIC: payment-created-topic
+      KAFKA_PAYMENT_INVALID_TOPIC: payment-invalid-topic
+      KAFKA_PAYMENT_GROUP: payment-event-group
     networks:
       - microservicios-saga-coreografia-network
   db-postgres:
